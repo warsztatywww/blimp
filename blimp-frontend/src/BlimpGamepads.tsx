@@ -10,7 +10,7 @@ export default function BlimpGamepads() {
     const pollGamepads = useCallback(() => {
         const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
         for (let i = 0; i < gamepads.length; ++i) {
-            if (inputSources.current.length < i) {
+            if (i >= inputSources.current.length) {
                 inputSources.current.push(-1);
                 lastUpdate.current.push(-1);
             }
@@ -21,10 +21,14 @@ export default function BlimpGamepads() {
                     inputSources.current[i] = context.registerInputProvider('Gamepad-' + i + '-' + gamepad.id);
 
                 if (gamepad.timestamp > lastUpdate.current[i]) {
+                    const leftJoystick = {x: gamepad.axes[0], y: gamepad.axes[1]};
+                    const rightTrigger = gamepad.axes.length === 8 ? gamepad.axes[5] / 2 + 0.5 : gamepad.buttons[7].value;
+                    const leftTrigger = gamepad.axes.length === 8 ? gamepad.axes[2] / 2 + 0.5 : gamepad.buttons[6].value;
+
                     const input: BlimpControls = {
-                        x: gamepad.axes[0],
-                        y: gamepad.buttons[7].value + -gamepad.buttons[6].value,
-                        z: -gamepad.axes[1]
+                        x: leftJoystick.x,
+                        y: rightTrigger - leftTrigger,
+                        z: -leftJoystick.y
                     };
                     context.updateInputProviderData(inputSources.current[i], input);
                     lastUpdate.current[i] = gamepad.timestamp;
