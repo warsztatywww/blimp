@@ -113,8 +113,8 @@ def send_static_file(path):
         else:
             res.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
         return res
-    except FileNotFoundError:
-        return 'Not found', 404
+    except OSError as e:
+        return str(e), 404
 
 @app.route('/')
 async def index(request):
