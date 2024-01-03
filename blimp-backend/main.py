@@ -7,9 +7,10 @@ except ImportError:
 import json
 import random
 import blimp_control
-import camera_server
+import camera_handler
 
 app = Microdot()
+cam = camera_handler.Camera()
 blimp = blimp_control.Blimp()
 current_input = {'x': 0, 'y': 0, 'z': 0}
 next_user_id = 0
@@ -80,29 +81,12 @@ async def websocket(request, ws):
 async def camera(request):
     boundary = '------------------------' + str(random.randint(0, 0x7FFFFFFF))
 
-    event = asyncio.Event()
-    camera_server.events.append(event)
-
-    class camera_loop:
-        def __init__(self):
-            self.first = True
-
-        def __aiter__(self):
-            return self
-
-        async def __anext__(self):
-            boundary_header = b'--' + boundary.encode() + b'\r\n'
-            if self.first:
-                self.first = False
-                return boundary_header
-            await event.wait()
-            frame = camera_server.frame
-            event.clear()
-            return b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n' + boundary_header
-
-        async def aclose(self):
-            camera_server.events.remove(event)
-            pass
+    async def camera_loop():
+        while True:
+            yield b'--' + boundary.encode() + b'\r\n'
+            await asyncio.sleep(1/5)
+            frame = cam.capture_camera_frame()
+            yield b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n'
 
     return camera_loop(), 200, {'Content-Type': 'multipart/x-mixed-replace; boundary=' + boundary}
 

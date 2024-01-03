@@ -1,6 +1,6 @@
 try:
     import asyncio
-except ModuleNotFoundError:
+except ImportError:
     import uasyncio as asyncio
 
 current_input = {'x': 0, 'y': 0, 'z': 0}
