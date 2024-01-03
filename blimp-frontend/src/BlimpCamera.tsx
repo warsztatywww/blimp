@@ -1,11 +1,12 @@
 import {useState} from "react";
+import NO_CAMERA from "./no-video.webp";
 
 export default function BlimpCamera({ url } : { url: string }) {
     const [fps, setFps] = useState<number>(5);
 
     return (
         <div style={{position: 'relative', width: '100%'}}>
-            {fps ? <img style={{width: '100%', height: '100%', objectFit: 'contain'}} src={url + '?fps=' + fps}/> : null}
+            <img style={{width: '100%', height: '100%', objectFit: 'contain'}} src={fps ? url + '?fps=' + fps : NO_CAMERA}/>
             <div style={{position: 'absolute', top: 10, right: 10}}>
                 <select
                     value={fps.toString()}
