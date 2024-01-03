@@ -35,7 +35,7 @@ def handle_packet(user_id, msg):
         del input_sources[user_id]
 
     # Take all input sources from all users and add it together
-    new_input = {'x': 0, 'y': 0, 'z': 0}    
+    new_input = {'x': 0, 'y': 0, 'z': 0}
     for inputs in input_sources.values():
         for input_obj in inputs:
             input = input_obj['data']
@@ -81,12 +81,24 @@ async def websocket(request, ws):
 async def camera(request):
     boundary = '------------------------' + str(random.randint(0, 0x7FFFFFFF))
 
-    async def camera_loop():
-        while True:
-            yield b'--' + boundary.encode() + b'\r\n'
+    class camera_loop:
+        def __init__(self):
+            self.first = True
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            boundary_header = b'--' + boundary.encode() + b'\r\n'
+            if self.first:
+                self.first = False
+                return boundary_header
             await asyncio.sleep(1/5)
             frame = cam.capture_camera_frame()
-            yield b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n'
+            return b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n' + boundary_header
+
+        async def aclose(self):
+            pass
 
     return camera_loop(), 200, {'Content-Type': 'multipart/x-mixed-replace; boundary=' + boundary}
 

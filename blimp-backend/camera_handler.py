@@ -11,7 +11,7 @@ try:
             camera.contrast(2)  # increase contrast
             camera.speffect(2)  # jpeg grayscale
 
-        def capture(self):
+        def capture_camera_frame(self):
             return camera.capture()
 except ImportError:
     import cv2
