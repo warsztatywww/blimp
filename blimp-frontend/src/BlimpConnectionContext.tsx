@@ -7,6 +7,7 @@ type BlimpConnectionContextData = {
     ws: WebSocket | null,
     registerInputReceiver: (update: (event: BlimpControls) => void) => number,
     unregisterInputReceiver: (handle: number) => void,
+    batteryLevel: number,
 }
 
 type BlimpConnectionProviderProps = {
@@ -19,11 +20,13 @@ export const BlimpConnectionContext = createContext<BlimpConnectionContextData>(
     ws: null,
     registerInputReceiver: () => -1,
     unregisterInputReceiver: () => {},
+    batteryLevel: -1,
 });
 
 export function BlimpConnectionContextProvider({ url, children } : PropsWithChildren<BlimpConnectionProviderProps>) {
     const nextId = useRef<number>(0);
     const inputReceivers = useRef<{[k: number]: (event: BlimpControls) => void}>({});
+    const [batteryLevel, setBatteryLevel] = useState<number>(-1);
 
     const registerInputReceiver = (update: (event: BlimpControls) => void): number => {
         const handle = nextId.current++
@@ -50,9 +53,16 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
 
         const onMessage = (e: any) => {
             const data = JSON.parse(e.data);
-            Object.values(inputReceivers.current).forEach(x => {
-                x(data as BlimpControls);
-            })
+            if ('x' in data && 'y' in data && 'z' in data) {
+                Object.values(inputReceivers.current).forEach(x => {
+                    x({x: data.x, y: data.y, z: data.z});
+                })
+            }
+            if ('battery' in data) {
+                if (data.battery !== batteryLevel) {
+                    setBatteryLevel(data.battery);
+                }
+            }
         }
 
         const onClose = (e: any) => {
@@ -76,7 +86,8 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
         isConnected,
         setConnected,
         registerInputReceiver,
-        unregisterInputReceiver
+        unregisterInputReceiver,
+        batteryLevel
     }
 
     return (

@@ -13,6 +13,7 @@ app = Microdot()
 cam = camera_handler.Camera()
 blimp = blimp_control.Blimp()
 current_input = {'x': 0, 'y': 0, 'z': 0}
+current_battery_voltage = -1
 next_user_id = 0
 
 connected_ws = set()
@@ -63,7 +64,8 @@ async def websocket(request, ws):
     print(user_id, ' connected')
     connected_ws.add(ws)
     try:
-        ws.send(json.dumps(current_input))
+        await ws.send(json.dumps(current_input))
+        await ws.send(json.dumps({'battery': current_battery_voltage}))
         while True:
             async def recv_msg():
                 message = await ws.receive()
@@ -124,10 +126,20 @@ async def index(request):
 async def static(request, path):
     return send_static_file(path)
 
+async def battery_reader_loop():
+    global current_battery_voltage
+    while True:
+        battery_voltage = blimp.get_battery_voltage()
+        if battery_voltage != current_battery_voltage:
+            current_battery_voltage = battery_voltage
+            broadcast(json.dumps({'battery': current_battery_voltage}))
+        await asyncio.sleep(0.25)
+
 async def main():
     await asyncio.gather(
         app.start_server(),
-        blimp.loop()
+        blimp.loop(),
+        battery_reader_loop(),
     )
 
 if __name__ == '__main__':
