@@ -80,6 +80,7 @@ async def websocket(request, ws):
 @app.route('/cam')
 async def camera(request):
     boundary = '------------------------' + str(random.randint(0, 0x7FFFFFFF))
+    fps = int(request.args.get('fps', '5'))
 
     class camera_loop:
         def __init__(self):
@@ -93,7 +94,7 @@ async def camera(request):
             if self.first:
                 self.first = False
                 return boundary_header
-            await asyncio.sleep(1/5)
+            await asyncio.sleep(1/fps)
             frame = cam.capture_camera_frame()
             return b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n' + boundary_header
 
