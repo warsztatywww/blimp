@@ -107,7 +107,12 @@ def send_static_file(path):
     if '..' in path:
         return 'Not found', 404
     try:
-        return send_file('static/' + path)
+        res = send_file('static/' + path)
+        if path.startswith('static/'):
+            res.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        else:
+            res.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        return res
     except FileNotFoundError:
         return 'Not found', 404
 
