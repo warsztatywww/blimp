@@ -1,7 +1,9 @@
-import {createContext, PropsWithChildren, useEffect, useRef, useState} from "react";
+import {createContext, Dispatch, PropsWithChildren, SetStateAction, useEffect, useRef, useState} from "react";
 import {BlimpControls} from "./BlimpInputContext";
 
 type BlimpConnectionContextData = {
+    isConnected: boolean,
+    setConnected: Dispatch<SetStateAction<boolean>>,
     ws: WebSocket | null,
     registerInputReceiver: (update: (event: BlimpControls) => void) => number,
     unregisterInputReceiver: (handle: number) => void,
@@ -12,6 +14,8 @@ type BlimpConnectionProviderProps = {
 }
 
 export const BlimpConnectionContext = createContext<BlimpConnectionContextData>({
+    isConnected: false,
+    setConnected: () => {},
     ws: null,
     registerInputReceiver: () => -1,
     unregisterInputReceiver: () => {},
@@ -31,8 +35,13 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
         delete inputReceivers.current[handle];
     }
 
+    const [isConnected, setConnected] = useState<boolean>(true);
     const [ws, setWs] = useState<WebSocket | null>(null);
     useEffect(() => {
+        if (!isConnected)
+            return;
+
+        setWs(null);
         const socket = new WebSocket(url);
 
         const onOpen = (e: any) => {
@@ -47,7 +56,7 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
         }
 
         const onClose = (e: any) => {
-            setWs(null);
+            setConnected(false);
         }
 
         socket.addEventListener("open", onOpen);
@@ -60,10 +69,12 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
             socket.removeEventListener("message", onMessage);
             socket.removeEventListener("close", onClose);
         }
-    }, [url]);
+    }, [url, isConnected]);
 
     const context: BlimpConnectionContextData = {
         ws,
+        isConnected,
+        setConnected,
         registerInputReceiver,
         unregisterInputReceiver
     }

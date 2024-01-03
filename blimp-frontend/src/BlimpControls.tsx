@@ -9,10 +9,18 @@ import BlimpGamepads from "./BlimpGamepads";
 export function BlimpControls() {
     const context = useContext(BlimpConnectionContext);
 
-    if (!context.ws) {
+    if (!context.ws || !context.isConnected) {
         return (
             <div style={{backgroundColor: 'red', padding: 20, borderRadius: 5, color: 'blue', fontWeight: 'bold'}}>
-                Please, wait, connecting...
+                {context.isConnected ?
+                    <>
+                        Please, wait, connecting... <button onClick={() => context.setConnected(false)}>Cancel</button>
+                    </>
+                :
+                    <>
+                        Control connection lost <button onClick={() => context.setConnected(true)}>Reconnect</button>
+                    </>
+                }
             </div>
         )
     }
