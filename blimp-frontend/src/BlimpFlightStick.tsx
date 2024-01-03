@@ -15,7 +15,7 @@ export default function BlimpFlightStick() {
 
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-        ctx.strokeStyle = '#000000';
+        ctx.strokeStyle = '#ffffff';
         ctx.strokeRect(ctx.canvas.width/2 - 50 - 20, ctx.canvas.height/2 - 50, 100,100);
         ctx.strokeRect(ctx.canvas.width/2 + 50 + 20, ctx.canvas.height/2 - 50, 20, 100);
 
