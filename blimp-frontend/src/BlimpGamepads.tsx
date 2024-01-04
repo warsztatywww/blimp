@@ -1,6 +1,29 @@
 import {useCallback, useContext, useEffect, useRef} from "react";
 import {BlimpControls, BlimpInputContext} from "./BlimpInputContext";
 
+// Thank our lord ChatGPT
+function applyJoystickDeadzone({ x, y }: { x: number; y: number }, deadzone: number): { x: number; y: number } {
+    const magnitude = Math.sqrt(x ** 2 + y ** 2);
+
+    if (magnitude < deadzone) {
+        // Joystick input is within the deadzone, return (0, 0)
+        return { x: 0, y: 0 };
+    } else {
+        // Calculate the normalized direction vector
+        const normalizedX = x / magnitude;
+        const normalizedY = y / magnitude;
+
+        // Calculate the magnitude within the range of the deadzone to 1.0
+        const adjustedMagnitude = Math.min(1, (magnitude - deadzone) / (1 - deadzone));
+
+        // Scale the normalized vector by the adjusted magnitude
+        const scaledX = normalizedX * adjustedMagnitude;
+        const scaledY = normalizedY * adjustedMagnitude;
+
+        return { x: scaledX, y: scaledY };
+    }
+}
+
 export default function BlimpGamepads() {
     const context = useContext(BlimpInputContext);
 
@@ -21,7 +44,7 @@ export default function BlimpGamepads() {
                     inputSources.current[i] = context.registerInputProvider('Gamepad-' + i + '-' + gamepad.id);
 
                 if (gamepad.timestamp > lastUpdate.current[i]) {
-                    const leftJoystick = {x: gamepad.axes[0], y: gamepad.axes[1]};
+                    const leftJoystick = applyJoystickDeadzone({x: gamepad.axes[0], y: gamepad.axes[1]}, 0.15);
                     const rightTrigger = gamepad.axes.length === 8 ? gamepad.axes[5] / 2 + 0.5 : gamepad.buttons[7].value;
                     const leftTrigger = gamepad.axes.length === 8 ? gamepad.axes[2] / 2 + 0.5 : gamepad.buttons[6].value;
 
