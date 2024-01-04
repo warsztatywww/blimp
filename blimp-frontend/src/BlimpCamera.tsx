@@ -7,7 +7,7 @@ export default function BlimpCamera({ url } : { url: string }) {
     const connection = useContext(BlimpConnectionContext);
     const input = useContext(BlimpInputContext);
 
-    const [fps, setFps] = useState<number>(5);
+    const [fps, setFps] = useState<number>(15);
 
     return (
         <div style={{position: 'relative', width: '100%'}}>
@@ -38,11 +38,11 @@ export default function BlimpCamera({ url } : { url: string }) {
                     <option value="3">3 FPS</option>
                     <option value="4">4 FPS</option>
                     <option value="5">5 FPS</option>
-                    <option value="6">6 FPS</option>
-                    <option value="7">7 FPS</option>
-                    <option value="8">8 FPS</option>
-                    <option value="9">9 FPS</option>
                     <option value="10">10 FPS</option>
+                    <option value="15">15 FPS</option>
+                    <option value="20">20 FPS</option>
+                    <option value="25">25 FPS</option>
+                    <option value="30">30 FPS</option>
                 </select>
             </div>
         </div>
