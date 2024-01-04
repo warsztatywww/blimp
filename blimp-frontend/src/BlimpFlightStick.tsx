@@ -16,14 +16,14 @@ export default function BlimpFlightStick() {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         ctx.strokeStyle = '#ffffff';
-        ctx.strokeRect(ctx.canvas.width/2 - 50 - 20, ctx.canvas.height/2 - 50, 100,100);
-        ctx.strokeRect(ctx.canvas.width/2 + 50 + 20, ctx.canvas.height/2 - 50, 20, 100);
+        ctx.strokeRect(ctx.canvas.width/2 - 50 - 40 - 1, ctx.canvas.height/2 - 50 - 1, 100 + 2,100 + 2);
+        ctx.strokeRect(ctx.canvas.width/2 + 50 + 40 - 1, ctx.canvas.height/2 - 50 - 1, 20 + 2, 100 + 2);
 
         ctx.fillStyle = input.isSendingInputs ? '#ff0000' : '#666666';
         ctx.beginPath();
-        ctx.arc(ctx.canvas.width/2 - 20 + 50 * controls.x, ctx.canvas.height/2 - 50 * controls.z, 5, 0, 2 * Math.PI);
+        ctx.arc(ctx.canvas.width/2 - 40 + 50 * controls.x, ctx.canvas.height/2 - 50 * controls.z, 5, 0, 2 * Math.PI);
         ctx.fill();
-        ctx.fillRect(ctx.canvas.width/2 + 50 + 20, ctx.canvas.height / 2, 20, -controls.y * 50);
+        ctx.fillRect(ctx.canvas.width/2 + 50 + 40, ctx.canvas.height / 2, 20, -controls.y * 50);
     }, [ref, input.isSendingInputs]);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ export default function BlimpFlightStick() {
     const updatePointer = (pointerId: number, canvas: HTMLCanvasElement, pos: {x: number, y: number}, type: 'horizontal' | 'vertical') => {
         const data: BlimpControls = {x: 0, y: 0, z: 0};
         if (type === 'horizontal') {
-            const x = (pos.x - (canvas.width / 2 - 20)) / 50;
+            const x = (pos.x - (canvas.width / 2 - 40)) / 50;
             const y = (pos.y - canvas.height / 2) / 50;
             data.x = Math.max(-1, Math.min(1, x));
             data.z = Math.max(-1, Math.min(1, -y));
@@ -64,11 +64,11 @@ export default function BlimpFlightStick() {
         let type: 'horizontal' | 'vertical' | '' = '';
         const canvas = ref.current;
         const pos = {x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY};
-        if (pos.x >= canvas.width/2-20 - 50 && pos.x <= canvas.width/2-20 + 50 &&
+        if (pos.x >= canvas.width/2 - 40 - 50 && pos.x <= canvas.width/2 - 40 + 50 &&
             pos.y >= canvas.height/2 - 50 && pos.y <= canvas.height/2 + 50) {
             type = 'horizontal';
         }
-        if (pos.x >= canvas.width/2 + 20 + 50 && pos.x <= canvas.width/2 + 20 + 50 + 20 &&
+        if (pos.x >= canvas.width/2 + 40 + 50 && pos.x <= canvas.width/2 + 40 + 50 + 20 &&
             pos.y >= canvas.height/2 - 50 && pos.y <= canvas.height/2 + 50) {
             type = 'vertical';
         }
