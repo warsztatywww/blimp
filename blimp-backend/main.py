@@ -154,9 +154,16 @@ async def battery_reader_loop():
             broadcast(json.dumps({'battery': current_battery_voltage}))
         await asyncio.sleep(0.25)
 
+async def server_loop():
+    try:
+        await app.start_server(port=80)
+    except PermissionError:
+        print("Failed to start on port 80, starting on port 5000 instead")
+        await app.start_server(port=5000)
+
 async def main():
     await asyncio.gather(
-        app.start_server(),
+        server_loop(),
         blimp.loop(),
         battery_reader_loop(),
     )
