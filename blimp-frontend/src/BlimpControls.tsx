@@ -1,6 +1,5 @@
 import React, {useContext} from "react";
 import {BlimpConnectionContext} from "./BlimpConnectionContext";
-import BlimpInputContextProvider from "./BlimpInputContext";
 import {BlimpInputSender} from "./BlimpInputSender";
 import BlimpKeyboard from "./BlimpKeyboard";
 import BlimpFlightStick from "./BlimpFlightStick";
@@ -26,11 +25,11 @@ export function BlimpControls() {
     }
 
     return (
-        <BlimpInputContextProvider>
+        <>
             <BlimpInputSender/>
             <BlimpKeyboard/>
             <BlimpFlightStick/>
             <BlimpGamepads/>
-        </BlimpInputContextProvider>
+        </>
     )
 }

@@ -1,4 +1,13 @@
-import {createContext, PropsWithChildren, useCallback, useEffect, useRef} from "react";
+import {
+    createContext,
+    Dispatch,
+    PropsWithChildren,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
 
 export type BlimpControls = {
     x: number,
@@ -12,6 +21,8 @@ export type BlimpControlsData = {
 }
 
 export type BlimpInputContextData = {
+    isSendingInputs: boolean,
+    setSendingInputs: Dispatch<SetStateAction<boolean>>,
     registerInputProvider: (id: string) => number,
     updateInputProviderData: (handle: number, data: BlimpControls) => void,
     unregisterInputProvider: (handle: number) => void,
@@ -20,6 +31,8 @@ export type BlimpInputContextData = {
 }
 
 export const BlimpInputContext = createContext<BlimpInputContextData>({
+    isSendingInputs: false,
+    setSendingInputs: () => {},
     registerInputProvider: () => -1,
     updateInputProviderData: () => {},
     unregisterInputProvider: () => {},
@@ -27,21 +40,22 @@ export const BlimpInputContext = createContext<BlimpInputContextData>({
     unregisterInputReceiver: () => {},
 });
 
-export default function BlimpInputContextProvider({ children } : PropsWithChildren<{}>) {
+export function BlimpInputContextProvider({ children } : PropsWithChildren<{}>) {
     const nextId = useRef<number>(0);
     const inputProviders = useRef<{[k: number]: BlimpControlsData}>({});
     const inputReceivers = useRef<{[k: number]: (event: BlimpControlsData[]) => void}>({});
+    const [isSendingInputs, setSendingInputs] = useState<boolean>(false);
 
     const updateInputs = useCallback(() => {
-        const event = Object.values(inputProviders.current);
+        const event = isSendingInputs ? Object.values(inputProviders.current) : [];
         Object.values(inputReceivers.current).forEach(x => {
             x(event);
         })
-    }, [inputProviders, inputReceivers]);
+    }, [inputProviders, inputReceivers, isSendingInputs]);
     useEffect(() => {
-        const timer = setInterval(updateInputs, 1000/30);
+        const timer = setInterval(updateInputs, !isSendingInputs ? 250 : 1000/30);
         return () => clearTimeout(timer);
-    }, [updateInputs]);
+    }, [isSendingInputs, updateInputs]);
 
     const registerInputProvider = (id: string): number => {
         const handle = nextId.current++
@@ -71,6 +85,8 @@ export default function BlimpInputContextProvider({ children } : PropsWithChildr
     }
 
     const context: BlimpInputContextData = {
+        isSendingInputs,
+        setSendingInputs,
         registerInputProvider,
         updateInputProviderData,
         unregisterInputProvider,

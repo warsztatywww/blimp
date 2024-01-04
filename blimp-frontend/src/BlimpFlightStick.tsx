@@ -19,12 +19,12 @@ export default function BlimpFlightStick() {
         ctx.strokeRect(ctx.canvas.width/2 - 50 - 20, ctx.canvas.height/2 - 50, 100,100);
         ctx.strokeRect(ctx.canvas.width/2 + 50 + 20, ctx.canvas.height/2 - 50, 20, 100);
 
-        ctx.fillStyle = '#ff0000';
+        ctx.fillStyle = input.isSendingInputs ? '#ff0000' : '#666666';
         ctx.beginPath();
         ctx.arc(ctx.canvas.width/2 - 20 + 50 * controls.x, ctx.canvas.height/2 - 50 * controls.z, 5, 0, 2 * Math.PI);
         ctx.fill();
         ctx.fillRect(ctx.canvas.width/2 + 50 + 20, ctx.canvas.height / 2, 20, -controls.y * 50);
-    }, [ref]);
+    }, [ref, input.isSendingInputs]);
 
     useEffect(() => {
         render({x: 0, y: 0, z: 0});
