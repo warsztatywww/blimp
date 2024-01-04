@@ -129,7 +129,7 @@ async def static(request, path):
 async def battery_reader_loop():
     global current_battery_voltage
     while True:
-        battery_voltage = blimp.get_battery_voltage()
+        battery_voltage = round(blimp.get_battery_voltage(), 2)
         if battery_voltage != current_battery_voltage:
             current_battery_voltage = battery_voltage
             broadcast(json.dumps({'battery': current_battery_voltage}))
