@@ -85,20 +85,39 @@ async def camera(request):
     fps = int(request.args.get('fps', '5'))
 
     class camera_loop:
+        STATE_BOUNDARY = 0
+        STATE_CAPTURE = 1
+        STATE_HEADERS = 2
+        STATE_FRAME = 3
+        STATE_END = 4
+
         def __init__(self):
-            self.first = True
+            self.state = camera_loop.STATE_BOUNDARY
+            self.boundary_header = b'--' + boundary.encode() + b'\r\n'
+            self.frame = None
 
         def __aiter__(self):
             return self
 
         async def __anext__(self):
-            boundary_header = b'--' + boundary.encode() + b'\r\n'
-            if self.first:
-                self.first = False
-                return boundary_header
-            await asyncio.sleep(1/fps)
-            frame = cam.capture_camera_frame()
-            return b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' + frame + b'\r\n' + boundary_header
+            # Magic state machine to avoid copying when using + to concatenate buffers
+            if self.state == camera_loop.STATE_BOUNDARY:
+                self.state = camera_loop.STATE_CAPTURE
+                return self.boundary_header
+            elif self.state == camera_loop.STATE_CAPTURE:
+                await asyncio.sleep(1/fps)
+                self.frame = cam.capture_camera_frame()
+                self.state = camera_loop.STATE_HEADERS
+                return ''
+            elif self.state == camera_loop.STATE_HEADERS:
+                self.state = camera_loop.STATE_FRAME
+                return b'Content-Type: image/jpeg\r\nContent-Length: ' + str(len(self.frame)).encode() + b'\r\n\r\n'
+            elif self.state == camera_loop.STATE_FRAME:
+                self.state = camera_loop.STATE_END
+                return self.frame
+            elif self.state == camera_loop.STATE_END:
+                self.state = camera_loop.STATE_BOUNDARY
+                return b'\r\n'
 
         async def aclose(self):
             pass
