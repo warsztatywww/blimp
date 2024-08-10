@@ -7,11 +7,11 @@ export default function BlimpCamera({ url } : { url: string }) {
     const connection = useContext(BlimpConnectionContext);
     const input = useContext(BlimpInputContext);
 
-    const [fps, setFps] = useState<number>(15);
+    const [fps, setFps] = useState<number>(30);
 
     return (
         <div style={{position: 'relative', width: '100%'}}>
-            <img style={{width: '100%', height: '100%', objectFit: 'contain'}} src={fps ? url + '?fps=' + fps : NO_CAMERA}/>
+            <img style={{width: '100%', height: '100%', objectFit: 'contain', transform: 'rotate(180deg)'}} src={fps ? url + '?fps=' + fps : NO_CAMERA}/>
             <div style={{position: 'absolute', top: 10, left: 10, color: 'white'}}>
                 <div>
                     Bateria: <b>{connection.batteryLevel >= 0 ? connection.batteryLevel.toFixed(2) : '-.--'} V</b>

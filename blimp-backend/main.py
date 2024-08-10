@@ -70,9 +70,9 @@ async def websocket(request, ws):
             async def recv_msg():
                 message = await ws.receive()
                 handle_packet(user_id, message)
-            await asyncio.wait_for(recv_msg(), timeout=1)
+            await asyncio.wait_for(recv_msg(), timeout=3)
     except asyncio.TimeoutError as e:
-        print(user_id, ' disconnected (timeout - no control data received for 1 second)')
+        print(user_id, ' disconnected (timeout - no control data received for 3 seconds)')
     except Exception as e:
         print(user_id, ' disconnected')
         print(e)

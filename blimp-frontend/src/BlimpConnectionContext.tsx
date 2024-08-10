@@ -67,6 +67,7 @@ export function BlimpConnectionContextProvider({ url, children } : PropsWithChil
 
         const onClose = (e: any) => {
             setConnected(false);
+            setTimeout(() => setConnected(true), 500);
         }
 
         socket.addEventListener("open", onOpen);
