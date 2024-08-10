@@ -7,9 +7,7 @@ try:
             if not cam:
                 raise Exception('Camera not ready')
 
-            camera.framesize(10)  # frame size 800X600 (1.33 espect ratio)
-            camera.contrast(2)  # increase contrast
-            camera.speffect(2)  # jpeg grayscale
+            camera.framesize(5) # 320x240
 
         def capture_camera_frame(self):
             return camera.capture()
