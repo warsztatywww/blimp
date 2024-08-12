@@ -36,7 +36,7 @@ class Blimp():
         self.servo_rig.duty_ns(servo_duty(z))
         l = y * min(1, 1 - 2*x)
         r = y * min(1, 1 + 2*x)
-        self.forwa_lef.value(l > 0)
+        self.forwa_lef.value(l < 0)
         self.speed_lef.duty_u16(speed_duty(l))
         self.forwa_rig.value(r < 0)
         self.speed_rig.duty_u16(speed_duty(r))
