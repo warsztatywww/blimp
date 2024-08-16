@@ -32,7 +32,7 @@ class Blimp():
     def set_input(self, new_input):
         self.current_input = new_input
         print('input change: ', new_input)
-        output = self.input_map(new_input)
+        output = self._input_map(new_input)
         self.servo_lef.duty_ns(servo_duty(-output['s_l'])) # up is minus, down is plus (or it's reversed below, idk)
         self.servo_rig.duty_ns(servo_duty(output['s_r']))
         l = output['e_l']
