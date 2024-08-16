@@ -4,6 +4,7 @@ except ImportError:
     import uasyncio as asyncio
 
 from machine import Pin, PWM, ADC
+import math
 
 def lerp(x, lower, upper):
     return lower + (upper - lower) * x / 1
@@ -41,13 +42,41 @@ class Blimp():
         self.forwa_rig.value(r < 0)
         self.speed_rig.duty_u16(speed_duty(r))
 
-    def _input_map(self, new_input):
+    def _simple_input_map(self, new_input):
         x, y, z = new_input['x'], new_input['y'], new_input['z']
         return {
             "e_l": y * min(1, 1 - 2*x),
-            "e_r": y * min(1, 1 - 2*x),
+            "e_r": y * min(1, 1 + 2*x),
             "s_l": z,
             "s_r": z,
+        }
+
+    def _input_map(self, new_input):
+        x, y, z = new_input['x'], new_input['y'], new_input['z']
+        thrust_mul = 1
+        if -0.1 < y < 0.1:
+            # y = 0
+            # we use special reverse thrust method, as reverse thrust works better
+            thrust_mul = -1
+            if z > 0:
+                rotation = -1 
+            else:
+                rotation = 1
+        elif y > 0:
+            rotation = math.atan(z/y) / 3.14 * 2
+        else:
+            # y < 0
+            y = -y
+            z = -z
+            rotation = math.atan(z/y) / 3.14 * 2
+            thrust_mul = -1
+            
+        requested_thrust = min((z*z + y*y)**0.5,1)
+        return {
+            "e_l": requested_thrust * thrust_mul * min(1, 1 - 2*x),
+            "e_r": requested_thrust * thrust_mul * min(1, 1 + 2*x),
+            "s_l": rotation,
+            "s_r": rotation,
         }
 
     async def loop(self):
