@@ -31,15 +31,24 @@ class Blimp():
     def set_input(self, new_input):
         self.current_input = new_input
         print('input change: ', new_input)
-        x, y, z = new_input['x'], new_input['y'], new_input['z']
-        self.servo_lef.duty_ns(servo_duty(-z))
-        self.servo_rig.duty_ns(servo_duty(z))
-        l = y * min(1, 1 - 2*x)
-        r = y * min(1, 1 + 2*x)
+        output = self.input_map(new_input)
+        self.servo_lef.duty_ns(servo_duty(-output['s_l'])) # up is minus, down is plus (or it's reversed below, idk)
+        self.servo_rig.duty_ns(servo_duty(output['s_r']))
+        l = output['e_l']
+        r = output['e_r']
         self.forwa_lef.value(l < 0)
         self.speed_lef.duty_u16(speed_duty(l))
         self.forwa_rig.value(r < 0)
         self.speed_rig.duty_u16(speed_duty(r))
+
+    def _input_map(self, new_input):
+        x, y, z = new_input['x'], new_input['y'], new_input['z']
+        return {
+            "e_l": y * min(1, 1 - 2*x),
+            "e_r": y * min(1, 1 - 2*x),
+            "s_l": z,
+            "s_r": z,
+        }
 
     async def loop(self):
         # TODO: blimp control logic
